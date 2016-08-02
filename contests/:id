@@ -300,4 +300,10 @@
   
     });
     
+    function getContestByShowOnSlug(){
+        initData();
+        var mallDataJSON = JSON.parse(sessionStorage.mallData);
+        return getObjects(mallDataJSON.contests,'show_on_slug',slug)
+    }
+    
 </script>
