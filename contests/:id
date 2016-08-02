@@ -148,7 +148,6 @@
             var pathArray = window.location.pathname.split( '/' );
             var slug = pathArray[pathArray.length-1];
             var contestDetails = getContestByShowOnSlug(slug);
-            var current
             if (contestDetails) {
                 renderPageData('#main_content','#contest_template',contestDetails, 'contestDetails')
                 $("#loading_screen").hide();
