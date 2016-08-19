@@ -26,6 +26,7 @@ background-color: #FFFFFF ;
 .store_map{
     margin-bottom:30px;
     overflow:hidden;
+    height:inherit;
 }
 .marker {
     background: url("http://kodekloud.s3.amazonaws.com/sites/54cfab316e6f6433ad020000/530d3a9b7bc13ce4a511089c23463f99/10dundas_pin.png") no-repeat;
@@ -87,14 +88,7 @@ background-color: #FFFFFF ;
     <div class="inside_page_content">
         <div class="left_column">
             <div class="store_map" id="store_map">
-                <div style="overflow:hidden">
-                    <div id="zControls">
-                        <button class="zoom-in"><span class="glyphicon glyphicon-plus"></span></button>
-                        <button class="zoom-out"><span class="glyphicon glyphicon-minus"></span></button>
-                        
-                    </div>
-                    <div id="map" class="panzoom-elements" style=""></div>
-                </div>
+                <div id="mapsvg_store_detail"></div>
             </div>
             <div id="store_desc_container">
                 <script id="store_desc_template" type="x-tmpl-mustache">
@@ -183,11 +177,10 @@ background-color: #FFFFFF ;
                 <p class="list_section_header" style="display:none" id="mobile_job_header" >Jobs</p>
                 <div class="promo_list_div" id="mobile_job_list_container">
                     <script id="mobile_job_list_template" type="x-tmpl-mustache/text">
-                        <a href="../jobs/{{slug}}"><p class="promo_header right_column_header">{{name}}</p></a>
-                        <p class="directory_content promo_date">{{job_type}}</p>
-                        <div class="promo_inside_content">
-                            <div class="promo_desc_box">
-                                <p>{{{rich_description}}}</p>
+                        <<div class="promo_inside_content">
+                            <div class="promo_desc_box" style="width:100%">
+                                <a href="../jobs/{{slug}}"><p class="promo_header right_column_header">{{name}}</p></a>
+                                <p class="directory_content promo_date"><a href="/stores/{{store_detail_btn}}">{{store_name}}</a><br>{{job_type}}<a href="../jobs/{{slug}}" class="btn btn-primary pull-right" style="margin-top:-17px">Read More</a></p>
                             </div>
                         </div>
                     </script>
@@ -197,10 +190,13 @@ background-color: #FFFFFF ;
     </div>
 </div>
 
-<!--For more information please see http://learnjs.io/blog/2013/11/30/snapsvg-resources/-->
-<script src="//cdnjs.cloudflare.com/ajax/libs/snap.svg/0.3.0/snap.svg-min.js"></script>
-<script src="http://kodekloud.s3.amazonaws.com/sites/5422419e4a616d74d9030000/e1fb5e17ab727d248230fbcb51da868f/jquery.panzoom.min.js"></script>
- 
+<script type="text/javascript" src="http://cdn.mallmaverick.com/javascripts/gallery/slimbox/slimbox2.js"></script>
+<link rel="stylesheet" href="http://cdn.mallmaverick.com/javascripts/gallery/slimbox/slimbox2.css" type="text/css" media="screen" />
+<script type="text/javascript" src="http://cdn.mallmaverick.com/javascripts/mapsvg/jquery.js"></script>
+<script type="text/javascript" src="http://cdn.mallmaverick.com/javascripts/mapsvg/raphael.js"></script>
+<script type="text/javascript" src="http://cdn.mallmaverick.com/javascripts/mapsvg/jquery.mousewheel.js"></script>
+<script type="text/javascript" src="http://cdn.mallmaverick.com/system/site_images/photos/000/005/107/original/mallmaverick_svgmap.js?1412885524"></script>
+
 <script>
     $(document).ready(function() {
         
@@ -236,7 +232,6 @@ background-color: #FFFFFF ;
                  } 
              });
              jobs = jobs_array;
-
             $('#loading_screen').hide();
             $('#main_content').fadeIn();
             // store_details.map_x_coordinate = store_details.x_coordinate - 19;
@@ -253,24 +248,21 @@ background-color: #FFFFFF ;
             // renderStoreDetailsTemplate('#store_deatils_map_template','#store_map',store_details);
             
             $("#pop-over").hide();
-            renderSVGMap(store_details);
-            
-            $(function(){
-                $('.demo1').craftmap({
-                    image: {
-                        width: 2240,
-                        height: 943,
-                        name: 'imgMap'
-                    },
-                    map: {
-                        position: 'center'
-                    }
-                });
-                $("#anchor_id").click();
-                $("#scroll_to_marker").click();
+            regions = {};
+            var stores = getStoresList();
+            $.each( stores , function( key, val ) {
+                if(val.svgmap_region != null && typeof(val.svgmap_region)  != 'undefined'){
+                    obj = {};
+                    obj["tooltip"] = "<div class='tooltip_div'><p class='tooltip_name'>"+val.name+"</p></div>"
+                    obj["attr"] = {}
+                    obj["attr"]["href"] = "/stores/"+val.slug
+                    regions[val.svgmap_region] = obj
+                }
             });
-            $.getScript("http://cdn.jsdelivr.net/slimbox/2.0.5/js/slimbox2.js");
-            $('head').append('<link rel="stylesheet" href="http://cdn.jsdelivr.net/slimbox/2.0.5/css/slimbox2.css" type="text/css" media="screen" />');
+            
+            load_map(regions, store_details);
+            
+            
             
         }
         
@@ -322,117 +314,7 @@ background-color: #FFFFFF ;
         
         
         
-        function renderSVGMap(store_details){
-                var isMobile = ( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) );
-
-                if(navigator.appVersion.indexOf("MSIE 9.") == -1){
-                    $('#map').bind('mousemove', function(e){
-                        //console.log(e.pageX+","+e.pageY);
-                       $('#pop-over').css({'top':e.pageY+20,'left':e.pageX-70});
-                    });
-                    var s = Snap("#map");
-                    var store_svg_id = null;
-                    if(store_details.svgmap_region != null && typeof(store_details.svgmap_region)  != 'undefined'){
-                        store_svg_id = "#"+ store_details.svgmap_region;
-                    }
-                    var stores = getStoresList();
-                    Snap.load(getSVGMapURL(), function (f) {
-                        if(store_svg_id!=null){
-                            f.select(store_svg_id).addClass("map-mouse-over");
-                            console.log(store_svg_id)
-                            
-                        }
-                        $.each( stores, function( key, value ) {
-                            if(value.svgmap_region != null && typeof(value.svgmap_region)  != 'undefined'){
-                                var svg_id = "#" + value.svgmap_region;
-                                f.select(svg_id).mouseover(function() {
-                                    if(typeof(value) != 'undefined' && value != null){
-                                        this.addClass("map-mouse-over");
-                                        $("#pop-over").show();
-                                        $("#pop-over-map-name").html(value.name);
-                                        $("#pop-over-map-phone").html(value.phone);
-                                        // console.log(this.getBBox());
-                                    }
-                                              
-                                });
-                                    
-                                //add the mouse up handler for hiding the pop over when done hovering
-                                
-                                    f.select(svg_id).mouseout(function() {
-                                        if (svg_id != store_svg_id) {
-                                            this.removeClass("map-mouse-over");    
-                                        }
-                                        
-                                        $("#pop-over").hide(0);
-                                        
-                                    });
-                                        
-                                
-                                
-                                //add the mouse up function for when the user clicks a store
-                                f.select(svg_id).mouseup(function() {
-                                    
-                                    if(!isMobile && !didPanZoom){
-                                        
-                                        goToStore(value);
-                                    }
-                                    didPanZoom = false;
-                                          
-                                });
-                            }
-                        });
-                        s.append(f.select("svg"));
-                        
-                        
-                        
-                    });
-                    
-                    var startingMapTransform = 'scale(0.7)';
-                    var startingPanX = -100;
-                    var startingPanY = -200;
-                    if(isMobile) {
-                            startingMapTransform = 'scale(.5)';
-                            startingPanX = -120;
-                            startingPanY = -200;
-                    }
-                    $('#loading').hide();
-                    $( "#page_content" ).fadeIn( "fast", function() {
-                        var panzoom = $(".panzoom-elements").panzoom({
-                            cursor: "move",
-                            increment: 0.15,
-                            minScale: 0.15,
-                            maxScale: 20,
-                            transition: true,
-                            duration: 150,
-                            easing: "ease-in-out",
-                            $zoomIn: $('.zoom-in'),
-                            $zoomOut: $('.zoom-out'),
-                            $zoomRange: $('.zoom-range'),
-                            startTransform: startingMapTransform
-                
-                        });
-                        $(".panzoom-elements").panzoom("pan", startingPanX, startingPanY, { relative: true });
-                        
-                        panzoom.on('panzoomchange', function(e, panzoom, matrix, changed) {
-                          didPanZoom = true;
-                        });
-                        
-                        panzoom.on('panzoomend', function(e, panzoom, matrix, changed) {
-                          didPanZoom = false;
-                        });
-                    });
-                }else{
-                    $('#loading').hide();
-                    $('#zControls').hide();
-                    $('#map').hide();
-                    $( "#page_content" ).fadeIn( "fast");
-                }
-            }
-        function goToStore(store_details){
-            if(typeof(store_details) != 'undefined' && store_details != null){
-                window.location.href = "/stores/"+store_details.slug;
-            }
-        }
+        
         
         function renderTemplate(container, template, collection, type){
             var item_list = [];
@@ -534,7 +416,8 @@ background-color: #FFFFFF ;
                     if (type == "promotions"){
                         start = new Date (val.start_date + "T05:00:00Z");
                     end = new Date (val.end_date + "T05:00:00Z");
-                       
+                        // start.setDate(start.getDate()+1);
+                        // end.setDate(end.getDate()+1);
                         val.dates = (get_month(start.getMonth()))+" "+(start.getDate())+" - "+get_month(end.getMonth())+" "+end.getDate();
                         if (val.description.length > 110) {
                            val.description =  val.description.substring(0,100)+'...';
@@ -609,6 +492,50 @@ background-color: #FFFFFF ;
         
         
     });
+    function load_map(reg, store_details, h, w){
+        this_region = {};
+        this_region = store_details.svgmap_region;
+        map = $('#mapsvg_store_detail').mapSvg({
+            source: getSVGMapURL(),
+            colors: {stroke: '#aaa', hover: 0, selected: '#ce3135'},
+            disableAll: true,
+            height:h,
+            width:w,
+            regions: reg,
+            tooltipsMode:'custom',
+            loadingText: "loading...",
+            zoom: true,
+            zoomButtons: {'show': true,'location': 'right' },
+            pan:true,
+            cursor:'pointer',
+            responsive:true,
+            zoomLimit: [0,10]
+        });
+        map.setViewBox(store_details.svgmap_region);
+        map.selectRegion(store_details.svgmap_region);
+        drop_pin(store_details.svgmap_region, map);
+        
+    }
     
+    function drop_pin(id, map){
+        var coords = map.get_coords(id);
+        var height = parseInt(coords["height"])
+        var width = parseInt(coords["width"])
+        var x_offset = (parseInt(width) / 2);
+        var y_offset = (parseInt(height) /2);
+        
+        map.setMarks([{ xy: [coords["x"] - 15 + x_offset, coords["y"] - 55 + y_offset],
+                  attrs: {
+                            src:  'http://assets.codecloudapp.com/sites/570d369d6e6f643d60030000/image/png/1463000912000/pin2.png'     // image for marker
+                          }
+            }
+            ])
+        map.setViewBox(id);
+        map.selectRegion(id);
+        $('#btnZoomIn').click();
+        $('#btnZoomIn').click();
+        $('#btnZoomIn').click();
+    }
     
 </script>
+
