@@ -1,0 +1,128 @@
+<div id="loading_screen">
+    <img alt="loading" src="//kodekloud.s3.amazonaws.com/sites/5447ebb66e6f641987020000/3604f5c26997bea3de504de139debcec/loading.gif"/>
+</div>
+<div  id="main_content" style="display:none">
+    <ul class="breadcrumb">
+        <li><a href="/home">Home</a> </li>
+        <li class="active">Leasing</li>
+    </ul>
+    <div class="page_banner">
+        leasing
+    </div>
+    <div class="inside_page_content">
+        <div class="left_column">
+            <img class="inside_banner_image" alt="banner" src="//kodekloud.s3.amazonaws.com/sites/55085c056e6f642bbe000000/bdc012515ea1803e34370b6db64e9bbf/leasing.jpg"/>
+            <p class="columns_2">
+                
+               <H2>Market Summary</H2>
+               <p>The Interchange is a fun and engaging entertainment destination for all ages. The Interchange is easy to get to and offers lots of FREE parking. The impressive venue accommodates a premier collection of national entertainment and food service brands which include: Boston Pizza, Dave & Buster's, Dub Linn Gate Irish Pub, Goodlife Fitness, Ivy Social Club, Luxy, Our Thai Restaurant & Cafe, Putting Edge Fun Centre, Upper Room Community Church, Wendel Clark's Classic Grill & Sports Lounge and Wendel's Loft and Yuk Yuk's Vaughan.</p>
+               <br>
+               <strong>Total GLA:  </strong>2283,032 square feet <br><br>
+               
+               
+              
+         
+          
+          <section class="article-text">
+               
+                        <br>
+                        <p style="margin-bottom:0"><strong>Major Tenants:</strong></p>
+                        
+                            <p>AMC Theatres 
+                            <br>Dave & Buster’s 
+                           
+                          
+                            
+                           
+                        </p>    
+                        <br>
+                        <p><strong>Ancillary:  </strong>112,285 square feet (10 stores and services) </p>
+                   
+                        <table>
+                            <tr>
+                                <td style="width:215px"><strong>Demographics:</strong></td>
+                               
+                                 <td style="width:215px">5km</td>
+                            </tr>
+                            <tr>
+                                <td style="width:215px"><strong>Total Population:</strong></td>
+                                <td style="width:100px">133,024</td>
+                               
+                            </tr>
+                            <tr>
+                                <td style="width:215px"><strong>Total Households:</strong></td>
+                                <td style="width:100px">41,028</td>
+                         
+                            </tr>
+                            <tr>
+                                <td style="width:215px"><strong>Household Average Income:</strong></td>
+                                <td style="width:100px">$83,326</td>
+                               
+                            </tr>
+                        </table>
+                        <br>
+             
+                        <h3>For Leasing Inquiries Contact:</h3>
+                  
+                        <p>Brian Anderson
+                        <br>Director of Leasing
+                        <br>1.866.681.2715
+                        <br><a href="mailto:banderson@bentallkennedy.com"><strong>banderson@bentallkennedy.com</strong></a>
+                        <br>
+                        <br>
+                        <a href="//kodekloud.s3.amazonaws.com/sites/55085c056e6f642bbe000000/bdc012515ea1803e34370b6db64e9bbf/Interchange%20Retail%20January%202015.pdf" target="blank"><strong>Click to download site plan PDF</strong></a>
+                            
+                        </p>
+        </div>
+         
+        <div class="right_column">
+            <p class="right_column_header">centre information</p>
+            <div id="centre_info_container">
+                <script id="centre_info_template" type="x-tmpl-mustache/text">
+                    <p class="directory_content">{{name}}</p>
+                    <p class="directory_content">{{address1}}</p>
+                    <p class="directory_content">{{city}}, {{province_state}} {{postal_code}}</p>
+                </script>
+            </div>
+            
+            
+        </div>
+  
+</div>
+<script>
+    $(document).ready(function() {
+        function renderAll (){
+            var propertyDetails = getPropertyDetails();
+            renderPageData('#centre_info_container','#centre_info_template',propertyDetails, 'property_details')
+            $("#loading_screen").hide();
+            $("#main_content").show();
+        }
+        
+    
+        function renderPageData(container, template, collection, type){
+            var item_list = [];
+            var item_rendered = [];
+            var template_html = $(template).html();
+            Mustache.parse(template_html);   // optional, speeds up future uses
+            if (type == "property_details"){
+                item_list.push(collection);
+                collection = []
+                collection = item_list;
+            }
+            $.each( collection , function( key, val ) {
+                var rendered = Mustache.render(template_html,val);
+                item_rendered.push(rendered);
+    
+            });
+            
+            $(container).show();
+            $(container).html(item_rendered.join(''));
+        };
+
+        loadMallData(renderAll);  
+
+    
+  
+    });
+    
+</script>
